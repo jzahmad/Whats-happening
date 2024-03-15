@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>ZenBlog Bootstrap Template - About</title>
+  <title>What's Happening - About</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -29,13 +29,6 @@
   <link href="assets/css/variables.css" rel="stylesheet">
   <link href="assets/css/main.css" rel="stylesheet">
 
-  <!-- =======================================================
-  * Template Name: ZenBlog
-  * Updated: Jan 29 2024 with Bootstrap v5.3.2
-  * Template URL: https://bootstrapmade.com/zenblog-bootstrap-blog-template/
-  * Author: BootstrapMade.com
-  * License: https:///bootstrapmade.com/license/
-  ======================================================== -->
 </head>
 
 <body>
@@ -44,7 +37,7 @@
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
-      <a href="index.html" class="logo d-flex align-items-center">
+      <a href="index.php" class="logo d-flex align-items-center">
         <!-- Uncomment the line below if you also wish to use an image logo -->
         <!-- <img src="assets/img/logo.png" alt=""> -->
         <h1>What's Happening</h1>
@@ -110,25 +103,33 @@
 
           <!-- ======= team members container ======= -->
           <?php
-          $groups='./files/groups.csv';
-          if (file_exists($groups)) {
-              if (($open = fopen($groups, "r")) !== FALSE) {
-                  while(($data = fgetcsv($open, 1000, ",")) !== FALSE){
-                      echo "<div class='col-lg-4 text-center mb-5'>
-                          <img src={$data[3]} alt='' class='img-fluid rounded-circle w-50 mb-4'>
-                          <h4>{$data[0]}</h4>
-                          <span class='d-block mb-3 text-uppercase'>{$data[1]}</span>
-                          <p>{$data[2]}</p>
-                      </div>";
-                  }
-                  fclose($open); // Don't forget to close the file after usage
-              } else {
-                  echo "File not opening\n";
-              }
-          } else {
-              echo "File not found\n";
+          include './serverlogin.php';
+          // Create connection
+          $conn = new mysqli($db_hostname, $db_username, $db_password, $db_database);
+
+          if ($conn->connect_error) {
+              die("Connection failed: " . $conn->connect_error);
           }
+
+          $sql = "SELECT * FROM groups";
+          $result = $conn->query($sql);
+
+          if ($result->num_rows > 0) {
+              while ($row = $result->fetch_assoc()) {
+                  echo "<div class='col-lg-4 text-center mb-5'>
+                            <img src='" . $row['GroupImage'] . "' alt='' class='img-fluid rounded-circle w-50 mb-4'>
+                            <h4>" . $row['GroupName'] . "</h4>
+                            <span class='d-block mb-3 text-uppercase'>" . $row['GroupType'] . "</span>
+                            <p>" . $row['GroupDesc'] . "</p>
+                        </div>";
+                      }
+                    } else {
+                      echo "0 results";
+                     }
+          $conn->close();
           ?>
+
+          <!-- End container -->
         </div>
       </div>
     </section>

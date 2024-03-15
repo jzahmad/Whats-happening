@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>ZenBlog Bootstrap Template - Single Post</title>
+  <title>What's Happening - Single Post</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -16,7 +16,9 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -29,13 +31,6 @@
   <link href="assets/css/variables.css" rel="stylesheet">
   <link href="assets/css/main.css" rel="stylesheet">
 
-  <!-- =======================================================
-  * Template Name: ZenBlog
-  * Updated: Jan 29 2024 with Bootstrap v5.3.2
-  * Template URL: https://bootstrapmade.com/zenblog-bootstrap-blog-template/
-  * Author: BootstrapMade.com
-  * License: https:///bootstrapmade.com/license/
-  ======================================================== -->
 </head>
 
 <body>
@@ -44,7 +39,7 @@
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
-      <a href="index.html" class="logo d-flex align-items-center">
+      <a href="index.php" class="logo d-flex align-items-center">
         <!-- Uncomment the line below if you also wish to use an image logo -->
         <!-- <img src="assets/img/logo.png" alt=""> -->
         <h1>What's Happening</h1>
@@ -52,7 +47,8 @@
       <nav id="navbar" class="navbar">
         <ul>
           <li><a href="index.php">Home</a></li>
-          <li class="dropdown"><a href="events.php"><span>Events</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
+          <li class="dropdown"><a href="events.php"><span>Events</span> <i
+                class="bi bi-chevron-down dropdown-indicator"></i></a>
             <ul>
               <li><a href="events.php?category=All">All events</a></li>
               <li><a href="events.php?category=Music">Music</a></li>
@@ -68,7 +64,7 @@
           <li><a href="login.php">Login</a></li>
         </ul>
       </nav><!-- .navbar -->
-      
+
 
       <div class="position-relative">
         <a href="#" class="mx-2"><span class="bi-facebook"></span></a>
@@ -102,36 +98,48 @@
 
             <!-- ======= Single Post Content ======= -->
             <?php
-            function findNameInColumn($name) {
-              $file = fopen('./files/events.csv', 'r');
-              if ($file !== false) {
-                  while (($row = fgetcsv($file)) !== false) {
-                      if (!empty($row) && isset($row[1]) && $row[1] === $name) { 
-                          fclose($file);
-                          return $row; // Return the entire row
-                      }
-                  }
-                  fclose($file);
+            include_once 'serverlogin.php';
+
+            $connection = new mysqli($db_hostname, $db_username, $db_password, $db_database);
+
+            if ($connection->connect_error) {
+              die("Connection failed: " . $connection->connect_error);
+            }
+
+            if (isset($_REQUEST['EventID'])) {
+              $event_id = $_REQUEST['EventID'];
+          
+              // Query to fetch event details along with group and event type information
+              $query = "SELECT Events.*, Groups.GroupName, Groups.ContactName, Groups.ContactEmail, EventTypes.EventType 
+                          FROM Events 
+                          INNER JOIN Groups ON Events.GroupID = Groups.GroupID
+                          INNER JOIN EventTypes ON Events.EventTypeID = EventTypes.EventTypeID 
+                          WHERE EventID = $event_id";
+
+              $result = mysqli_query($connection, $query);
+
+              if (mysqli_num_rows($result) > 0) {
+                $event = mysqli_fetch_assoc($result);
+
+                echo '<div class="single-post">    
+                    <div class="post-meta"><strong>' . $event['EventType'] . ' <span class="mx-1">&bullet;</span> Date: ' . date('D d M, Y', strtotime($event['EventDate'])) . ' TIME: ' . date('h:i a', strtotime($event['EventDate'])) . '</strong></div>
+                    <h1 class="mt-3 mb-5"><strong>' . $event['EventTitle'] . '</strong></h1>
+                          <h2 class="mb-2"><strong>Organizer: ' . $event['GroupName'] . '</strong></h2>
+                          <h3 class="mt-2 mb-5">(Contact ' . $event['ContactName'] . ' at ' . $event['ContactEmail'] . ' for more info)</h3>
+                          <p><span class="firstcharacter">' . substr($event['EventDesc'], 0, 1) . '</span>' . substr($event['EventDesc'], 1) . '</p>
+                          <br>
+                          <figure class="my-4">
+                            <img src="' . $event['EventImage'] . '" alt="" class="img-fluid">
+                          </figure>
+                        </div>';
+              } else {
+                // If no event found with the provided ID
+                echo '<p>No event found with the provided ID.</p>';
               }
-                return null;
+            } else {
+              // If event ID is not provided in the query string
+              echo '<p>Event ID is not provided.</p>';
             }
-            
-            if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                // Handle form submission
-                if (isset($_POST['title'])){
-                    $name = $_POST['title']; 
-                    $arr = findNameInColumn($name); 
-                }
-            }
-            echo '<div class="single-post">
-                  <div class="post-meta"><span class="date">'.$arr[3].'</span> <span class="mx-1">&bullet;</span>'.$arr[2].'<span></span></div>
-                  <h1 class="mb-5">'.$arr[1].'</h1>
-                  <p><span class="firstcharacter">'.substr($arr[5], 0, 1).'</span>'.substr($arr[5], 1).'</p>
-                  <br>
-                  <figure class="my-4">
-                    <img src="files/images/events/' . $arr[4] . '.jpg" alt="" class="img-fluid">
-                  </figure>
-                </div>';
             ?>
 
             <!-- ======= Comments ======= -->
@@ -149,7 +157,9 @@
                     <span class="text-muted">2d</span>
                   </div>
                   <div class="comment-body">
-                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Non minima ipsum at amet doloremque qui magni, placeat deserunt pariatur itaque laudantium impedit aliquam eligendi repellendus excepturi quibusdam nobis esse accusantium.
+                    Lorem ipsum, dolor sit amet consectetur adipisicing elit. Non minima ipsum at amet doloremque qui
+                    magni, placeat deserunt pariatur itaque laudantium impedit aliquam eligendi repellendus excepturi
+                    quibusdam nobis esse accusantium.
                   </div>
 
                   <div class="comment-replies bg-light p-3 mt-3 rounded">
@@ -183,7 +193,8 @@
                           <span class="text-muted">1d</span>
                         </div>
                         <div class="reply-body">
-                          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio dolore sed eos sapiente, praesentium.
+                          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Distinctio dolore sed eos sapiente,
+                          praesentium.
                         </div>
                       </div>
                     </div>
@@ -202,7 +213,8 @@
                     <span class="text-muted">4d</span>
                   </div>
                   <div class="comment-body">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Iusto laborum in corrupti dolorum, quas delectus nobis porro accusantium molestias sequi.
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Iusto laborum in corrupti dolorum, quas
+                    delectus nobis porro accusantium molestias sequi.
                   </div>
                 </div>
               </div>
@@ -225,7 +237,8 @@
                   <div class="col-12 mb-3">
                     <label for="comment-message">Message</label>
 
-                    <textarea class="form-control" id="comment-message" placeholder="Enter your name" cols="30" rows="10"></textarea>
+                    <textarea class="form-control" id="comment-message" placeholder="Enter your name" cols="30"
+                      rows="10"></textarea>
                   </div>
                   <div class="col-12">
                     <input type="submit" class="btn btn-primary" value="Post comment">
@@ -241,52 +254,65 @@
 
               <ul class="nav nav-pills custom-tab-nav mb-4" id="pills-tab" role="tablist">
                 <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="pills-popular-tab" data-bs-toggle="pill" data-bs-target="#pills-popular" type="button" role="tab" aria-controls="pills-popular" aria-selected="true">Popular</button>
+                  <button class="nav-link active" id="pills-popular-tab" data-bs-toggle="pill"
+                    data-bs-target="#pills-popular" type="button" role="tab" aria-controls="pills-popular"
+                    aria-selected="true">Popular</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="pills-trending-tab" data-bs-toggle="pill" data-bs-target="#pills-trending" type="button" role="tab" aria-controls="pills-trending" aria-selected="false">Trending</button>
+                  <button class="nav-link" id="pills-trending-tab" data-bs-toggle="pill"
+                    data-bs-target="#pills-trending" type="button" role="tab" aria-controls="pills-trending"
+                    aria-selected="false">Trending</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="pills-latest-tab" data-bs-toggle="pill" data-bs-target="#pills-latest" type="button" role="tab" aria-controls="pills-latest" aria-selected="false">Latest</button>
+                  <button class="nav-link" id="pills-latest-tab" data-bs-toggle="pill" data-bs-target="#pills-latest"
+                    type="button" role="tab" aria-controls="pills-latest" aria-selected="false">Latest</button>
                 </li>
               </ul>
 
               <div class="tab-content" id="pills-tabContent">
 
                 <!-- Popular -->
-                <div class="tab-pane fade show active" id="pills-popular" role="tabpanel" aria-labelledby="pills-popular-tab">
+                <div class="tab-pane fade show active" id="pills-popular" role="tabpanel"
+                  aria-labelledby="pills-popular-tab">
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Sport</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Sport</span> <span class="mx-1">&bullet;</span> <span>Jul
+                        5th '22</span></div>
                     <h2 class="mb-2"><a href="#">How to Avoid Distraction and Stay Focused During Video Calls?</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
-                    <h2 class="mb-2"><a href="#">17 Pictures of Medium Length Hair in Layers That Will Inspire Your New Haircut</a></h2>
+                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
+                    <h2 class="mb-2"><a href="#">17 Pictures of Medium Length Hair in Layers That Will Inspire Your New
+                        Haircut</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Culture</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Culture</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">9 Half-up/half-down Hairstyles for Long and Medium Hair</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">Life Insurance And Pregnancy: A Working Mom’s Guide</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Business</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Business</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">The Best Homemade Masks for Face (keep the Pimples Away)</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">10 Life-Changing Hacks Every Working Mom Should Know</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
@@ -295,36 +321,43 @@
                 <!-- Trending -->
                 <div class="tab-pane fade" id="pills-trending" role="tabpanel" aria-labelledby="pills-trending-tab">
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
-                    <h2 class="mb-2"><a href="#">17 Pictures of Medium Length Hair in Layers That Will Inspire Your New Haircut</a></h2>
+                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
+                    <h2 class="mb-2"><a href="#">17 Pictures of Medium Length Hair in Layers That Will Inspire Your New
+                        Haircut</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Culture</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Culture</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">9 Half-up/half-down Hairstyles for Long and Medium Hair</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">Life Insurance And Pregnancy: A Working Mom’s Guide</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Sport</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Sport</span> <span class="mx-1">&bullet;</span> <span>Jul
+                        5th '22</span></div>
                     <h2 class="mb-2"><a href="#">How to Avoid Distraction and Stay Focused During Video Calls?</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Business</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Business</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">The Best Homemade Masks for Face (keep the Pimples Away)</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">10 Life-Changing Hacks Every Working Mom Should Know</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
@@ -333,37 +366,44 @@
                 <!-- Latest -->
                 <div class="tab-pane fade" id="pills-latest" role="tabpanel" aria-labelledby="pills-latest-tab">
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">Life Insurance And Pregnancy: A Working Mom’s Guide</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Business</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Business</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">The Best Homemade Masks for Face (keep the Pimples Away)</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">10 Life-Changing Hacks Every Working Mom Should Know</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Sport</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Sport</span> <span class="mx-1">&bullet;</span> <span>Jul
+                        5th '22</span></div>
                     <h2 class="mb-2"><a href="#">How to Avoid Distraction and Stay Focused During Video Calls?</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
-                    <h2 class="mb-2"><a href="#">17 Pictures of Medium Length Hair in Layers That Will Inspire Your New Haircut</a></h2>
+                    <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
+                    <h2 class="mb-2"><a href="#">17 Pictures of Medium Length Hair in Layers That Will Inspire Your New
+                        Haircut</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
 
                   <div class="post-entry-1 border-bottom">
-                    <div class="post-meta"><span class="date">Culture</span> <span class="mx-1">&bullet;</span> <span>Jul 5th '22</span></div>
+                    <div class="post-meta"><span class="date">Culture</span> <span class="mx-1">&bullet;</span>
+                      <span>Jul 5th '22</span></div>
                     <h2 class="mb-2"><a href="#">9 Half-up/half-down Hairstyles for Long and Medium Hair</a></h2>
                     <span class="author mb-3 d-block">Jenny Wilson</span>
                   </div>
@@ -372,16 +412,6 @@
 
               </div>
             </div>
-
-            <div class="aside-block">
-              <h3 class="aside-title">Video</h3>
-              <div class="video-post">
-                <a href="https://www.youtube.com/watch?v=AiFfDjmd0jU" class="glightbox link-video">
-                  <span class="bi-play-fill"></span>
-                  <img src="assets/img/post-landscape-5.jpg" alt="" class="img-fluid">
-                </a>
-              </div>
-            </div><!-- End Video -->
 
             <div class="aside-block">
               <h3 class="aside-title">Categories</h3>
@@ -422,7 +452,9 @@
         <div class="row g-5">
           <div class="col-lg-4">
             <h3 class="footer-heading">About What's Happening</h3>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam ab, perspiciatis beatae autem deleniti voluptate nulla a dolores, exercitationem eveniet libero laudantium recusandae officiis qui aliquid blanditiis omnis quae. Explicabo?</p>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam ab, perspiciatis beatae autem deleniti
+              voluptate nulla a dolores, exercitationem eveniet libero laudantium recusandae officiis qui aliquid
+              blanditiis omnis quae. Explicabo?</p>
             <p><a href="about.php" class="footer-link-more">Learn More</a></p>
           </div>
           <div class="col-6 col-lg-2">
@@ -488,7 +520,8 @@
 
   </footer>
 
-  <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
 
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>ZenBlog Bootstrap Template - Contact</title>
+  <title>What's Happening - Contact</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -16,7 +16,9 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -29,13 +31,6 @@
   <link href="assets/css/variables.css" rel="stylesheet">
   <link href="assets/css/main.css" rel="stylesheet">
 
-  <!-- =======================================================
-  * Template Name: ZenBlog
-  * Updated: Jan 29 2024 with Bootstrap v5.3.2
-  * Template URL: https://bootstrapmade.com/zenblog-bootstrap-blog-template/
-  * Author: BootstrapMade.com
-  * License: https:///bootstrapmade.com/license/
-  ======================================================== -->
 </head>
 
 <body>
@@ -44,14 +39,15 @@
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
-      <a href="index.html" class="logo d-flex align-items-center">
+      <a href="index.php" class="logo d-flex align-items-center">
         <h1>What's Happening</h1>
       </a>
 
       <nav id="navbar" class="navbar">
         <ul>
           <li><a href="index.php">Home</a></li>
-          <li class="dropdown"><a href="events.php"><span>Events</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
+          <li class="dropdown"><a href="events.php"><span>Events</span> <i
+                class="bi bi-chevron-down dropdown-indicator"></i></a>
             <ul>
               <li><a href="events.php?category=All">All events</a></li>
               <li><a href="events.php?category=Music">Music</a></li>
@@ -103,33 +99,80 @@
           <form method="post" action="post.php">
             <input type="text" name="name" class="form-control" placeholder="Your Community Group" required>
             <input type="text" class="form-control" name="title" placeholder="Your Event Title" required>
-            <input type="text" class="form-control" name="date" placeholder="Your Event Date [Format: day-month-year]" required>
+            <input type="text" class="form-control" name="date" placeholder="Your Event Date [Format: year-month-day]"required>
+            <input type="text" class="form-control" name="time" placeholder="Event Time [Format: HH:MM AM/PM]" required>
             <input type="text" class="form-control" name="type" placeholder="Event Type" required>
             <input type="text" class="form-control" name="image" placeholder="Image Name" required>
-            <textarea class="form-control" name="description" rows="5" placeholder="The Event Description" required></textarea>
-            <div class="text-center "><input class= "btn btn-dark" type="submit" /></div>
+            <textarea class="form-control" name="description" rows="5" placeholder="The Event Description"required></textarea>
+            <div class="text-center"><input class="btn btn-dark" type="submit" /></div>
           </form>
         </div>
-        <?php
-          if ($_SERVER["REQUEST_METHOD"] == "POST") {
-              // Handle form submission
-              if (isset($_POST['name']) && isset($_POST['title']) && isset($_POST['date']) && isset($_POST['type']) && isset($_POST['image']) && isset($_POST['description'])) {
-                  $name = $_POST['name'];
-                  $title = $_POST['title'];
-                  $date = $_POST['date'];
-                  $type = $_POST['type'];
-                  $image = $_POST['image'];
-                  $description = $_POST['description'];
 
-                  $csvFilePath = "./files/events.csv";
-                  $file = fopen($csvFilePath, "a");
-                  fputcsv($file, array($name, $title, $date, $type, $image, $description));
-                  fclose($file);
-              }
+        <?php
+        include_once 'serverlogin.php';
+
+
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+          $name = $_POST['name'];
+          $title = $_POST['title'];
+          $date = $_POST['date'];
+          $time = $_POST['time'];
+          $type = $_POST['type'];
+          $image = $_POST['image'];
+          $description = $_POST['description'];
+
+          $formattime =date('H:i:s', strtotime($time));     
+          $formatDate = date('Y-m-d', strtotime($date));
+          $eventDateTime="$formatDate $formattime";
+          
+          $submitDateTime = date('Y-m-d H:i:s');
+
+          $conn = new mysqli($db_hostname, $db_username, $db_password, $db_database);
+
+          if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
           }
+
+
+          // // Get EventTypeID and GroupID based on the event type name
+          $eventName = $_POST['type']; // Assuming you receive the event type name from the form
+        
+          // Retrieve EventTypeID
+          $stmtEventType = $conn->prepare("SELECT EventTypeID FROM eventtypes WHERE EventType = ?");
+          $stmtEventType->bind_param("s", $type);
+          $stmtEventType->execute();
+          $resultEventType = $stmtEventType->get_result();
+          $rowEventType = $resultEventType->fetch_assoc();
+          $eventTypeID = $rowEventType['EventTypeID'];
+
+
+          $stmtGroup = $conn->prepare("SELECT GroupID FROM groups WHERE GroupName = ?");
+          $stmtGroup->bind_param("s", $name);
+          $stmtGroup->execute();
+          $resultGroup = $stmtGroup->get_result();
+          $rowGroup = $resultGroup->fetch_assoc();
+          $groupID = $rowGroup['GroupID'];
+
+          // Get other form data
+          $title = $_POST['title'];
+          $date = $_POST['date'];
+          $image = $_POST['image'];
+          $description = $_POST['description'];
+
+          $stmt = $conn->prepare("INSERT INTO events (EventTypeID, GroupID, EventTitle, EventDate, SubmitDate, EventImage, EventDesc) VALUES (?, ?, ?, ?, ?, ?, ?)");
+          $stmt->bind_param("iisssss", $eventTypeID, $groupID, $title, $eventDateTime, $submitDateTime, $image, $description);
+
+          // Execute the statement
+          $stmt->execute();
+
+          // Close the statement and connection
+          $stmt->close();
+          $conn->close();
+        }
         ?>
+        <!-- End post part -->
     </section>
-  </main><!-- End #main -->
+  </main>
 
   <!-- ======= Footer ======= -->
   <footer id="footer" class="footer">
@@ -139,7 +182,9 @@
         <div class="row g-5">
           <div class="col-lg-4">
             <h3 class="footer-heading">About What's Happening</h3>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam ab, perspiciatis beatae autem deleniti voluptate nulla a dolores, exercitationem eveniet libero laudantium recusandae officiis qui aliquid blanditiis omnis quae. Explicabo?</p>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam ab, perspiciatis beatae autem deleniti
+              voluptate nulla a dolores, exercitationem eveniet libero laudantium recusandae officiis qui aliquid
+              blanditiis omnis quae. Explicabo?</p>
             <p><a href="about.php" class="footer-link-more">Learn More</a></p>
           </div>
           <div class="col-6 col-lg-2">
@@ -168,44 +213,45 @@
       </div>
     </div>
 
-<div class="footer-legal">
-  <div class="container">
+    <div class="footer-legal">
+      <div class="container">
 
-    <div class="row justify-content-between">
-      <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-        <div class="copyright">
-          © Copyright <strong><span>ZenBlog</span></strong>. All Rights Reserved
-        </div>
+        <div class="row justify-content-between">
+          <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+            <div class="copyright">
+              © Copyright <strong><span>ZenBlog</span></strong>. All Rights Reserved
+            </div>
 
-        <div class="credits">
-          <!-- All the links in the footer should remain intact. -->
-          <!-- You can delete the links only if you purchased the pro version. -->
-          <!-- Licensing information: https://bootstrapmade.com/license/ -->
-          <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/herobiz-bootstrap-business-template/ -->
-          Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+            <div class="credits">
+              <!-- All the links in the footer should remain intact. -->
+              <!-- You can delete the links only if you purchased the pro version. -->
+              <!-- Licensing information: https://bootstrapmade.com/license/ -->
+              <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/herobiz-bootstrap-business-template/ -->
+              Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+            </div>
+
+          </div>
+
+          <div class="col-md-6">
+            <div class="social-links mb-3 mb-lg-0 text-center text-md-end">
+              <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+              <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+              <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+              <a href="#" class="google-plus"><i class="bi bi-skype"></i></a>
+              <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+            </div>
+
+          </div>
+
         </div>
 
       </div>
-
-      <div class="col-md-6">
-        <div class="social-links mb-3 mb-lg-0 text-center text-md-end">
-          <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-          <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-          <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-          <a href="#" class="google-plus"><i class="bi bi-skype"></i></a>
-          <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-        </div>
-
-      </div>
-
     </div>
 
-  </div>
-</div>
+  </footer>
 
-</footer>
-
-  <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
 
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
