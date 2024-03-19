@@ -35,6 +35,15 @@
 
 <body>
 
+  <?php
+  session_start();
+  if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
+    header('Location: login.php');
+    exit;
+  }
+
+  ?>
+
   <!-- ======= Header ======= -->
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
@@ -60,7 +69,19 @@
           <li><a href="groups.php">Community Groups</a></li>
           <li><a href="about.php">About</a></li>
           <li><a href="post.php">Post Event</a></li>
-          <li><a href="login.php">Login</a></li>
+          <ul>
+            <?php if (isset($_SESSION['login']) && $_SESSION['login'] === true): ?>
+              <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Login <span
+                    class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="post.php">Login</a></li>
+                  <li><a href="login.php?logout=true">Logout</a></li>
+                </ul>
+              </li>
+            <?php else: ?>
+              <li><a href="login.php">Login</a></li>
+            <?php endif; ?>
+          </ul>
         </ul>
       </nav><!-- .navbar -->
 
@@ -87,6 +108,7 @@
 
   </header><!-- End Header -->
 
+
   <main id="main">
     <section id="contact" class="contact mb-5">
       <div class="container" data-aos="fade-up">
@@ -96,14 +118,38 @@
           </div>
         </div>
         <div class="form mt-5">
+          <?php
+          include_once 'serverlogin.php';
+
+          session_start();
+          $groupID = $_SESSION['GroupID'];
+          $conn = new mysqli($db_hostname, $db_username, $db_password, $db_database);
+          if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+          }
+
+          $sql = "SELECT GroupName FROM groups WHERE GroupID = ?";
+          $stmt = $conn->prepare($sql);
+          $stmt->bind_param("i", $groupID); // Assuming GroupID is an integer
+          $stmt->execute();
+
+          $stmt->bind_result($groupName);
+          $stmt->fetch();
+          $stmt->close();
+          $conn->close();
+
+          // Display the group name
+          echo "<div class='text-center mb-3'><h4>Group Name: $groupName</h4></div>";
+          ?>
           <form method="post" action="post.php">
-            <input type="text" name="name" class="form-control" placeholder="Your Community Group" required>
             <input type="text" class="form-control" name="title" placeholder="Your Event Title" required>
-            <input type="text" class="form-control" name="date" placeholder="Your Event Date [Format: year-month-day]"required>
+            <input type="text" class="form-control" name="date" placeholder="Your Event Date [Format: year-month-day]"
+              required>
             <input type="text" class="form-control" name="time" placeholder="Event Time [Format: HH:MM AM/PM]" required>
             <input type="text" class="form-control" name="type" placeholder="Event Type" required>
             <input type="text" class="form-control" name="image" placeholder="Image Name" required>
-            <textarea class="form-control" name="description" rows="5" placeholder="The Event Description"required></textarea>
+            <textarea class="form-control" name="description" rows="5" placeholder="The Event Description"
+              required></textarea>
             <div class="text-center"><input class="btn btn-dark" type="submit" /></div>
           </form>
         </div>
@@ -113,7 +159,8 @@
 
 
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-          $name = $_POST['name'];
+
+          $name = $groupName;
           $title = $_POST['title'];
           $date = $_POST['date'];
           $time = $_POST['time'];
@@ -121,10 +168,10 @@
           $image = $_POST['image'];
           $description = $_POST['description'];
 
-          $formattime =date('H:i:s', strtotime($time));     
+          $formattime = date('H:i:s', strtotime($time));
           $formatDate = date('Y-m-d', strtotime($date));
-          $eventDateTime="$formatDate $formattime";
-          
+          $eventDateTime = "$formatDate $formattime";
+
           $submitDateTime = date('Y-m-d H:i:s');
 
           $conn = new mysqli($db_hostname, $db_username, $db_password, $db_database);

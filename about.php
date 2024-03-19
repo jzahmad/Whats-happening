@@ -16,7 +16,9 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -33,6 +35,9 @@
 
 <body>
 
+  <?php
+  session_start();
+  ?>
   <!-- ======= Header ======= -->
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
@@ -47,7 +52,8 @@
       <nav id="navbar" class="navbar">
         <ul>
           <li><a href="index.php">Home</a></li>
-          <li class="dropdown"><a href="events.php"><span>Events</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
+          <li class="dropdown"><a href="events.php"><span>Events</span> <i
+                class="bi bi-chevron-down dropdown-indicator"></i></a>
             <ul>
               <li><a href="events.php?category=All">All events</a></li>
               <li><a href="events.php?category=Music">Music</a></li>
@@ -60,7 +66,19 @@
           <li><a href="groups.php">Community Groups</a></li>
           <li><a href="about.php">About</a></li>
           <li><a href="post.php">Post Event</a></li>
-          <li><a href="login.php">Login</a></li>
+          <ul>
+            <?php if (isset($_SESSION['login']) && $_SESSION['login'] === true): ?>
+              <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Login <span
+                    class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="post.php">Login</a></li>
+                  <li><a href="login.php?logout=true">Logout</a></li>
+                </ul>
+              </li>
+            <?php else: ?>
+              <li><a href="login.php">Login</a></li>
+            <?php endif; ?>
+          </ul>
         </ul>
       </nav>
       <!-- .navbar -->
@@ -109,8 +127,13 @@
               <div class="post-meta mt-4">About us</div>
               <h2 class="mb-4 display-4">Company History</h2>
 
-              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis, perspiciatis repellat maxime, adipisci non ipsam at itaque rerum vitae, necessitatibus nulla animi expedita cumque provident inventore? Voluptatum in tempora earum deleniti, culpa odit veniam, ea reiciendis sunt ullam temporibus aut!</p>
-              <p>Fugit eaque illum blanditiis, quo exercitationem maiores autem laudantium unde excepturi dolores quasi eos vero harum ipsa quam laborum illo aut facere voluptates aliquam adipisci sapiente beatae ullam. Tempora culpa iusto illum accusantium cum hic quisquam dolor placeat officiis eligendi.</p>
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis, perspiciatis repellat maxime,
+                adipisci non ipsam at itaque rerum vitae, necessitatibus nulla animi expedita cumque provident
+                inventore? Voluptatum in tempora earum deleniti, culpa odit veniam, ea reiciendis sunt ullam temporibus
+                aut!</p>
+              <p>Fugit eaque illum blanditiis, quo exercitationem maiores autem laudantium unde excepturi dolores quasi
+                eos vero harum ipsa quam laborum illo aut facere voluptates aliquam adipisci sapiente beatae ullam.
+                Tempora culpa iusto illum accusantium cum hic quisquam dolor placeat officiis eligendi.</p>
             </div>
           </div>
 
@@ -122,8 +145,13 @@
               <div class="post-meta mt-4">Mission &amp; Vision</div>
               <h2 class="mb-4 display-4">Mission &amp; Vision</h2>
 
-              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis, perspiciatis repellat maxime, adipisci non ipsam at itaque rerum vitae, necessitatibus nulla animi expedita cumque provident inventore? Voluptatum in tempora earum deleniti, culpa odit veniam, ea reiciendis sunt ullam temporibus aut!</p>
-              <p>Fugit eaque illum blanditiis, quo exercitationem maiores autem laudantium unde excepturi dolores quasi eos vero harum ipsa quam laborum illo aut facere voluptates aliquam adipisci sapiente beatae ullam. Tempora culpa iusto illum accusantium cum hic quisquam dolor placeat officiis eligendi.</p>
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis, perspiciatis repellat maxime,
+                adipisci non ipsam at itaque rerum vitae, necessitatibus nulla animi expedita cumque provident
+                inventore? Voluptatum in tempora earum deleniti, culpa odit veniam, ea reiciendis sunt ullam temporibus
+                aut!</p>
+              <p>Fugit eaque illum blanditiis, quo exercitationem maiores autem laudantium unde excepturi dolores quasi
+                eos vero harum ipsa quam laborum illo aut facere voluptates aliquam adipisci sapiente beatae ullam.
+                Tempora culpa iusto illum accusantium cum hic quisquam dolor placeat officiis eligendi.</p>
             </div>
           </div>
 
@@ -141,8 +169,14 @@
         <div class="row justify-content-between align-items-lg-center">
           <div class="col-lg-5 mb-4 mb-lg-0">
             <h2 class="display-4 mb-4">Latest News</h2>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed, rem eaque vel est asperiores iste pariatur placeat molestias, rerum provident ea maiores debitis eum earum esse quas architecto! Minima, voluptatum! Minus tempora distinctio quo sint est blanditiis voluptate eos. Commodi dolore nesciunt culpa adipisci nemo expedita suscipit autem dolorum rerum?</p>
-            <p>At magni dolore ullam odio sapiente ipsam, numquam eius minus animi inventore alias quam fugit corrupti error iste laboriosam dolorum culpa doloremque eligendi repellat iusto vel impedit odit cum. Sequi atque molestias nesciunt rem eum pariatur quibusdam deleniti saepe eius maiores porro quam, praesentium ipsa deserunt laboriosam adipisci. Optio, animi!</p>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed, rem eaque vel est asperiores iste pariatur
+              placeat molestias, rerum provident ea maiores debitis eum earum esse quas architecto! Minima, voluptatum!
+              Minus tempora distinctio quo sint est blanditiis voluptate eos. Commodi dolore nesciunt culpa adipisci
+              nemo expedita suscipit autem dolorum rerum?</p>
+            <p>At magni dolore ullam odio sapiente ipsam, numquam eius minus animi inventore alias quam fugit corrupti
+              error iste laboriosam dolorum culpa doloremque eligendi repellat iusto vel impedit odit cum. Sequi atque
+              molestias nesciunt rem eum pariatur quibusdam deleniti saepe eius maiores porro quam, praesentium ipsa
+              deserunt laboriosam adipisci. Optio, animi!</p>
             <p><a href="#" class="more">View All Blog Posts</a></p>
           </div>
           <div class="col-lg-6">
@@ -170,7 +204,9 @@
         <div class="row g-5">
           <div class="col-lg-4">
             <h3 class="footer-heading">About What's Happening</h3>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam ab, perspiciatis beatae autem deleniti voluptate nulla a dolores, exercitationem eveniet libero laudantium recusandae officiis qui aliquid blanditiis omnis quae. Explicabo?</p>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam ab, perspiciatis beatae autem deleniti
+              voluptate nulla a dolores, exercitationem eveniet libero laudantium recusandae officiis qui aliquid
+              blanditiis omnis quae. Explicabo?</p>
             <p><a href="about.php" class="footer-link-more">Learn More</a></p>
           </div>
           <div class="col-6 col-lg-2">
@@ -237,7 +273,8 @@
   </footer>
 
 
-  <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
 
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

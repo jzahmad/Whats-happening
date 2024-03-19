@@ -16,7 +16,9 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+    rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -32,6 +34,17 @@
 
 <body>
 
+  <?php
+  session_start();
+  if (isset($_GET['logout']) && $_GET['logout'] === 'true') {
+    // Destroy the session
+    session_destroy();
+
+    // Redirect to the login page or wherever you want after logout
+    header('Location: login.php');
+    exit;
+  }
+  ?>
   <!-- ======= Header ======= -->
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
@@ -45,7 +58,8 @@
       <nav id="navbar" class="navbar">
         <ul>
           <li><a href="index.php">Home</a></li>
-          <li class="dropdown"><a href="events.php"><span>Events</span> <i class="bi bi-chevron-down dropdown-indicator"></i></a>
+          <li class="dropdown"><a href="events.php"><span>Events</span> <i
+                class="bi bi-chevron-down dropdown-indicator"></i></a>
             <ul>
               <li><a href="events.php?category=All">All events</a></li>
               <li><a href="events.php?category=Music">Music</a></li>
@@ -58,7 +72,19 @@
           <li><a href="groups.php">Community Groups</a></li>
           <li><a href="about.php">About</a></li>
           <li><a href="post.php">Post Event</a></li>
-          <li><a href="login.php">Login</a></li>
+          <ul>
+            <?php if (isset($_SESSION['login']) && $_SESSION['login'] === true): ?>
+              <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Login <span
+                    class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="post.php">Login</a></li>
+                  <li><a href="login.php?logout=true">Logout</a></li>
+                </ul>
+              </li>
+            <?php else: ?>
+              <li><a href="login.php">Login</a></li>
+            <?php endif; ?>
+          </ul>
         </ul>
       </nav><!-- .navbar -->
 
@@ -95,32 +121,83 @@
           </div>
         </div>
 
+        <div>
+          <div class="container">
+            <div class="row justify-content-center mt-5">
+              <div class="col-md-6">
+                <form action="login.php" method="post" role="form">
+                  <div class="mb-3">
+                    <input type="text" name="uname" class="form-control" id="uname" placeholder="Your Username"
+                      required>
+                  </div>
+                  <div class="mb-3">
+                    <input type="password" class="form-control" name="upass" id="upass" placeholder="Your Password"
+                      required>
+                  </div>
+                  <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                  </div>
+                </form>
 
-        <div class="form mt-5">
-          <form action="forms/contact.php" method="post" role="form" class="php-email-form">
-            <div class="row">
-              <div class="form-group col-md-6">
-                <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required>
-              </div>
-              <div class="form-group col-md-6">
-                <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" required>
-              </div>
-            </div>
-            <div class="form-group">
-              <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" required>
-            </div>
-            <div class="form-group">
-              <textarea class="form-control" name="message" rows="5" placeholder="Message" required></textarea>
-            </div>
-            <div class="my-3">
-              <div class="loading">Loading</div>
-              <div class="error-message"></div>
-              <div class="sent-message">Your message has been sent. Thank you!</div>
-            </div>
-            <div class="text-center"><button type="submit">Login</button></div>
-          </form>
-        </div><!-- End Contact Form -->
+                <?php
 
+                include_once 'serverlogin.php';
+
+                if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+                  $conn = new mysqli($db_hostname, $db_username, $db_password, $db_database);
+                  if ($conn->connect_error) {
+                    die("Connection failed: " . $conn->connect_error);
+                  }
+
+                  $uname = $_POST['uname'];
+                  $upass = $_POST['upass'];
+
+                  $sql = "SELECT * FROM login WHERE Username='$uname'";
+                  $result = $conn->query($sql);
+
+                  if ($result->num_rows == 1) {
+
+                    $row = $result->fetch_assoc();
+
+                    if ($row['Password'] === $upass) {
+
+                      session_start();
+                      $_SESSION['login'] = true;
+
+                      $_SESSION['AccountID'] = $row['AccountID'];
+                      $_SESSION['GroupID'] = $row['GroupID'];
+                      header("Location: post.php");
+                      exit();
+
+
+                    } else {
+                      echo "<div class='text-center mt-3'>Incorrect password</div>";
+                    }
+                  } else {
+                    echo "<div class='text-center mt-3'>Username not found</div>";
+                  }
+                  $conn->close();
+                }
+                ?>
+
+
+              </div>
+            </div>
+          </div>
+
+          <!-- End Contact Form -->
+          <div>
+            <div class="text-center">
+              <br />
+              <b>Don't have an account?</b>
+              <br />
+              <b>Sign up your group and start posting your events.</b>
+              <br />
+              <a href="/createAccount.php" class="btn btn-success">Create Account</a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -135,7 +212,9 @@
         <div class="row g-5">
           <div class="col-lg-4">
             <h3 class="footer-heading">About What's Happening</h3>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam ab, perspiciatis beatae autem deleniti voluptate nulla a dolores, exercitationem eveniet libero laudantium recusandae officiis qui aliquid blanditiis omnis quae. Explicabo?</p>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Magnam ab, perspiciatis beatae autem deleniti
+              voluptate nulla a dolores, exercitationem eveniet libero laudantium recusandae officiis qui aliquid
+              blanditiis omnis quae. Explicabo?</p>
             <p><a href="about.php" class="footer-link-more">Learn More</a></p>
           </div>
           <div class="col-6 col-lg-2">
@@ -201,7 +280,8 @@
 
   </footer>
 
-  <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+  <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
 
   <!-- Vendor JS Files -->
   <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

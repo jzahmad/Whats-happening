@@ -34,7 +34,10 @@
 </head>
 
 <body>
-
+  <?php
+  session_start();
+  // Other PHP code
+  ?>
   <!-- ======= Header ======= -->
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
@@ -62,7 +65,18 @@
           <li><a href="groups.php">Community Groups</a></li>
           <li><a href="about.php">About</a></li>
           <li><a href="post.php">Post Event</a></li>
-          <li><a href="login.php">Login</a></li>
+          <ul>
+            <?php if (isset($_SESSION['login']) && $_SESSION['login'] === true): ?>
+              <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Login <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="post.php">Login</a></li>
+                  <li><a href="login.php?logout=true">Logout</a></li>
+                </ul>
+              </li>
+            <?php else: ?>
+              <li><a href="login.php">Login</a></li>
+            <?php endif; ?>
+          </ul>
         </ul>
       </nav><!-- .navbar -->
 
@@ -137,8 +151,8 @@
                   echo "Error: " . mysqli_error($connection);
                 }
 
-              //  added happening soon events
-              
+                //  added happening soon events
+                
                 $happeningSoonQuery = "SELECT * FROM events WHERE EventDate >= CURDATE() ORDER BY EventDate ASC LIMIT 1";
                 $happeningSoonResult = mysqli_query($connection, $happeningSoonQuery);
 
@@ -152,7 +166,7 @@
                                 <p><strong>' . $happeningSoonEvent['EventTitle'] . ':</strong> ' . $happeningSoonEvent['EventDesc'] . '</p>
                               </div>
                             </a>
-                          </div>';       
+                          </div>';
                   }
                 } else {
                   echo "Error: " . mysqli_error($connection);

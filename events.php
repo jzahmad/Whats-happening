@@ -35,7 +35,9 @@
 </head>
 
 <body>
-
+  <?php
+  session_start();
+  ?>
   <!-- ======= Header for navigation======= -->
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
@@ -64,7 +66,19 @@
           <li><a href="groups.php">Community Groups</a></li>
           <li><a href="about.php">About</a></li>
           <li><a href="post.php">Post Event</a></li>
-          <li><a href="login.php">Login</a></li>
+          <ul>
+            <?php if (isset($_SESSION['login']) && $_SESSION['login'] === true): ?>
+              <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Login <span
+                    class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="post.php">Login</a></li>
+                  <li><a href="login.php?logout=true">Logout</a></li>
+                </ul>
+              </li>
+            <?php else: ?>
+              <li><a href="login.php">Login</a></li>
+            <?php endif; ?>
+          </ul>
         </ul>
       </nav>
       <!-- .navbar -->
@@ -134,8 +148,8 @@
                 $query .= " WHERE EventTypes.EventType = '$eventType'";
               }
 
-              $query .= " ORDER BY STR_TO_DATE(Events.EventDate, '%Y-%m-%d %h:%i %p') ASC"; 
-              
+              $query .= " ORDER BY STR_TO_DATE(Events.EventDate, '%Y-%m-%d %h:%i %p') ASC";
+
               $result = mysqli_query($connection, $query);
 
               if ($result) {
@@ -152,7 +166,7 @@
                                     <div>
                                         <div class="post-meta"><strong><span>' . $row['EventType'] . '</span><span class="mx-1">&bullet;</span><span class="date">' . $formattedDateTime . '</span></strong></div>
                                         <form action="single-post.php" method="post">
-                                          <h2>' .$row['EventTitle'] .'</h2>
+                                          <h2>' . $row['EventTitle'] . '</h2>
                                           <h3 style="margin: 0;"><button type="submit" style="border: none; background: none; padding: 0; margin: 0; color: inherit; text-decoration: none;">' . $row['Title'] . '</button></h3>
                                         </form>
                                         <div class="d-flex align-items-center author">
@@ -168,218 +182,140 @@
                 echo "Error fetching events: " . mysqli_error($connection);
               }
               ?>
-              </div>
-              <!-- end of events-->
+            </div>
+            <!-- end of events-->
 
-              <div class="text-start py-4">
-                <div class="custom-pagination">
-                  <a href="#" class="prev">Prevous</a>
-                  <a href="#" class="active">1</a>
-                  <a href="#">2</a>
-                  <a href="#">3</a>
-                  <a href="#">4</a>
-                  <a href="#">5</a>
-                  <a href="#" class="next">Next</a>
-                </div>
+            <div class="text-start py-4">
+              <div class="custom-pagination">
+                <a href="#" class="prev">Prevous</a>
+                <a href="#" class="active">1</a>
+                <a href="#">2</a>
+                <a href="#">3</a>
+                <a href="#">4</a>
+                <a href="#">5</a>
+                <a href="#" class="next">Next</a>
               </div>
             </div>
-
-            <!-- the right  sidebar -->
-
-            <div class="col-md-3">
-              <!-- ======= left Side bar ======= -->
-              <div class="aside-block">
-
-                <ul class="nav nav-pills custom-tab-nav mb-4" id="pills-tab" role="tablist">
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="pills-popular-tab" data-bs-toggle="pill"
-                      data-bs-target="#pills-popular" type="button" role="tab" aria-controls="pills-popular"
-                      aria-selected="true">Upcoming</button>
-                  </li>
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="pills-trending-tab" data-bs-toggle="pill"
-                      data-bs-target="#pills-trending" type="button" role="tab" aria-controls="pills-trending"
-                      aria-selected="false">Latest Added</button>
-                  </li>
-                </ul>
-
-                <div class="tab-content" id="pills-tabContent">
-
-                  <!-- Popular -->
-                  <div class="tab-pane fade show active" id="pills-popular" role="tabpanel"
-                    aria-labelledby="pills-popular-tab">
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Sport</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">How to Avoid Distraction and Stay Focused During Video Calls?</a>
-                      </h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">17 Pictures of Medium Length Hair in Layers That Will Inspire Your
-                          New Haircut</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Culture</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">9 Half-up/half-down Hairstyles for Long and Medium Hair</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">Life Insurance And Pregnancy: A Working Mom’s Guide</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Business</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">The Best Homemade Masks for Face (keep the Pimples Away)</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">10 Life-Changing Hacks Every Working Mom Should Know</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-                  </div> <!-- End Popular -->
-
-                  <!-- Trending -->
-                  <div class="tab-pane fade" id="pills-trending" role="tabpanel" aria-labelledby="pills-trending-tab">
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">17 Pictures of Medium Length Hair in Layers That Will Inspire Your
-                          New Haircut</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Culture</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">9 Half-up/half-down Hairstyles for Long and Medium Hair</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">Life Insurance And Pregnancy: A Working Mom’s Guide</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Sport</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">How to Avoid Distraction and Stay Focused During Video Calls?</a>
-                      </h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Business</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">The Best Homemade Masks for Face (keep the Pimples Away)</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">10 Life-Changing Hacks Every Working Mom Should Know</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-                  </div> <!-- End Trending -->
-
-                  <!-- Latest -->
-                  <div class="tab-pane fade" id="pills-latest" role="tabpanel" aria-labelledby="pills-latest-tab">
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">Life Insurance And Pregnancy: A Working Mom’s Guide</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Business</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">The Best Homemade Masks for Face (keep the Pimples Away)</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">10 Life-Changing Hacks Every Working Mom Should Know</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Sport</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">How to Avoid Distraction and Stay Focused During Video Calls?</a>
-                      </h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Lifestyle</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">17 Pictures of Medium Length Hair in Layers That Will Inspire Your
-                          New Haircut</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                    <div class="post-entry-1 border-bottom">
-                      <div class="post-meta"><span class="date">Culture</span> <span class="mx-1">&bullet;</span>
-                        <span>Jul 5th '22</span></div>
-                      <h2 class="mb-2"><a href="#">9 Half-up/half-down Hairstyles for Long and Medium Hair</a></h2>
-                      <span class="author mb-3 d-block">Jenny Wilson</span>
-                    </div>
-
-                  </div> <!-- End Latest -->
-
-                </div>
-              </div>
-
-              <div class="aside-block">
-                <h3 class="aside-title">Categories</h3>
-                <ul class="aside-links list-unstyled">
-                  <li><a href="events.php?category=All">All events</a></li>
-                  <li><a href="events.php?category=Music">Music</a></li>
-                  <li><a href="events.php?category=Art+Culture">Art + Culture</a></li>
-                  <li><a href="events.php?category=Sport">Sport</a></li>
-                  <li><a href="events.php?category=Food">Food</a></li>
-                  <li><a href="events.php?category=Fund+Raiser">Fund Raiser</a></li>
-                </ul>
-              </div><!-- End Categories -->
-
-              <div class="aside-block">
-                <h3 class="aside-title">Tags</h3>
-                <ul class="aside-tags list-unstyled">
-                  <li><a href="events.php?category=All">All events</a></li>
-                  <li><a href="events.php?category=Music">Music</a></li>
-                  <li><a href="events.php?category=Art+Culture">Art + Culture</a></li>
-                  <li><a href="events.php?category=Sport">Sport</a></li>
-                  <li><a href="events.php?category=Food">Food</a></li>
-                  <li><a href="events.php?category=Fund+Raiser">Fund Raiser</a></li>
-                </ul>
-              </div><!-- End Tags -->
-
-            </div>
-
-            <!-- ======= left Side bar ======= -->
-
           </div>
+
+          <!-- the right  sidebar -->
+
+          <div class="col-md-3">
+            <!-- ======= left Side bar ======= -->
+            <div class="aside-block">
+
+              <ul class="nav nav-pills custom-tab-nav mb-4" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link active" id="pills-popular-tab" data-bs-toggle="pill"
+                    data-bs-target="#pills-popular" type="button" role="tab" aria-controls="pills-popular"
+                    aria-selected="true">Upcoming</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link" id="pills-trending-tab" data-bs-toggle="pill"
+                    data-bs-target="#pills-trending" type="button" role="tab" aria-controls="pills-trending"
+                    aria-selected="false">Latest Added</button>
+                </li>
+              </ul>
+
+              <div class="tab-content" id="pills-tabContent">
+
+                <?php
+                include_once 'serverlogin.php';
+
+                $connection = new mysqli($db_hostname, $db_username, $db_password, $db_database);
+                if ($connection->connect_error) {
+                  die("Connection failed: " . $connection->connect_error);
+                }
+
+                // upcoming
+                $happeningSoonQuery = "SELECT e.*, et.EventType, c.ContactName 
+                    FROM events e 
+                    JOIN eventtypes et ON e.EventTypeID = et.EventTypeID 
+                    JOIN groups c ON e.GroupID = c.GroupID 
+                    WHERE e.EventDate >= CURDATE() 
+                    ORDER BY e.EventDate ASC";
+
+                $happeningSoonResult = mysqli_query($connection, $happeningSoonQuery);
+
+                if ($happeningSoonResult) {
+                  echo '<div class="tab-pane fade show active" id="pills-popular" role="tabpanel" aria-labelledby="pills-popular-tab">';
+                  while ($happeningSoonEvent = mysqli_fetch_assoc($happeningSoonResult)) {
+                    echo '<div class="post-entry-1 border-bottom">
+                <div class="post-meta"><span class="date">' . $happeningSoonEvent['EventType'] . '</span> <span class="mx-1">&bullet;</span>
+                    <span>' . $happeningSoonEvent['EventDate'] . '</span>
+                </div>
+                <h2 class="mb-2"><a href="#">' . $happeningSoonEvent['EventTitle'] . '</a></h2>
+                <span class="author mb-3 d-block">' . $happeningSoonEvent['ContactName'] . '</span>
+            </div>';
+                  }
+                  echo '</div>';
+                } else {
+                  echo "Error: " . mysqli_error($connection);
+                }
+
+                // Latest Added
+                $latestEventQuery = "
+                                  SELECT e.*, et.EventType, c.ContactName 
+                                  FROM events e 
+                                  JOIN eventtypes et ON e.EventTypeID = et.EventTypeID 
+                                  JOIN groups c ON e.GroupID = c.GroupID 
+                                  ORDER BY e.SubmitDate DESC
+                                  ";
+
+                $latestEventResult = mysqli_query($connection, $latestEventQuery);
+
+                if ($latestEventResult) {
+                  echo '<div class="tab-pane fade" id="pills-trending" role="tabpanel" aria-labelledby="pills-trending-tab">';
+                  while ($latestEvent = mysqli_fetch_assoc($latestEventResult)) {
+                    echo '<div class="post-entry-1 border-bottom">
+                <div class="post-meta"><span class="date">' . $latestEvent['EventType'] . '</span> <span class="mx-1">&bullet;</span>
+                    <span>' . $latestEvent['EventDate'] . '</span>
+                </div>
+                <h2 class="mb-2"><a href="#">' . $latestEvent['EventTitle'] . '</a></h2>
+                <span class="author mb-3 d-block">' . $latestEvent['ContactName'] . '</span>
+            </div>';
+                  }
+                  echo '</div>';
+                } else {
+                  echo "Error: " . mysqli_error($connection);
+                }
+
+                // Close the database connection
+                mysqli_close($connection);
+                ?>
+
+              </div>
+            </div>
+            <div class="aside-block">
+              <h3 class="aside-title">Categories</h3>
+              <ul class="aside-links list-unstyled">
+                <li><a href="events.php?category=All">All events</a></li>
+                <li><a href="events.php?category=Music">Music</a></li>
+                <li><a href="events.php?category=Art+Culture">Art + Culture</a></li>
+                <li><a href="events.php?category=Sport">Sport</a></li>
+                <li><a href="events.php?category=Food">Food</a></li>
+                <li><a href="events.php?category=Fund+Raiser">Fund Raiser</a></li>
+              </ul>
+            </div><!-- End Categories -->
+
+            <div class="aside-block">
+              <h3 class="aside-title">Tags</h3>
+              <ul class="aside-tags list-unstyled">
+                <li><a href="events.php?category=All">All events</a></li>
+                <li><a href="events.php?category=Music">Music</a></li>
+                <li><a href="events.php?category=Art+Culture">Art + Culture</a></li>
+                <li><a href="events.php?category=Sport">Sport</a></li>
+                <li><a href="events.php?category=Food">Food</a></li>
+                <li><a href="events.php?category=Fund+Raiser">Fund Raiser</a></li>
+              </ul>
+            </div><!-- End Tags -->
+            <!-- ======= left Side bar ======= -->
+          </div>
+
+
+
         </div>
+      </div>
     </section>
   </main><!-- End #main -->
 
