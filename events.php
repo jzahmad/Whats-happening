@@ -67,7 +67,7 @@
           <li><a href="about.php">About</a></li>
           <li><a href="post.php">Post Event</a></li>
           <ul>
-            <?php if (isset($_SESSION['login']) && $_SESSION['login'] === true): ?>
+            <?php if (isset ($_SESSION['login']) && $_SESSION['login'] === true): ?>
               <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Login <span
                     class="caret"></span></a>
                 <ul class="dropdown-menu">
@@ -118,7 +118,7 @@
               <h3 class="category-title">Category:
                 <?php
                 // Retrieve and display the EventType if provided in the URL
-                if (isset($_GET['category'])) {
+                if (isset ($_GET['category'])) {
                   echo $_GET['category'];
                 } else {
                   echo "All";
@@ -131,11 +131,11 @@
               $connection = new mysqli($db_hostname, $db_username, $db_password, $db_database);
 
               if ($connection->connect_error) {
-                die("Connection failed: " . $connection->connect_error);
+                die ("Connection failed: " . $connection->connect_error);
               }
 
               // Retrieve EventType from the query parameter
-              $eventType = isset($_GET['category']) ? $_GET['category'] : '';
+              $eventType = isset ($_GET['category']) ? $_GET['category'] : '';
 
               // Prepare SQL query to fetch events based on EventType
               $query = "SELECT Events.*, Groups.GroupName, Groups.GroupImage, EventTypes.EventType 
@@ -144,7 +144,7 @@
                                       INNER JOIN EventTypes ON Events.EventTypeID = EventTypes.EventTypeID";
 
               // Append WHERE clause to filter by EventType if provided
-              if (!empty($eventType) && $eventType != 'All') {
+              if (!empty ($eventType) && $eventType != 'All') {
                 $query .= " WHERE EventTypes.EventType = '$eventType'";
               }
 
@@ -224,7 +224,7 @@
 
                 $connection = new mysqli($db_hostname, $db_username, $db_password, $db_database);
                 if ($connection->connect_error) {
-                  die("Connection failed: " . $connection->connect_error);
+                  die ("Connection failed: " . $connection->connect_error);
                 }
 
                 // upcoming
@@ -238,11 +238,13 @@
                 $happeningSoonResult = mysqli_query($connection, $happeningSoonQuery);
 
                 if ($happeningSoonResult) {
+
                   echo '<div class="tab-pane fade show active" id="pills-popular" role="tabpanel" aria-labelledby="pills-popular-tab">';
                   while ($happeningSoonEvent = mysqli_fetch_assoc($happeningSoonResult)) {
+                    $formattedDateTime = date_format(date_create($happeningSoonEvent['EventDate']), 'd-M-y') . ' &bull; ' . date_format(date_create($happeningSoonEvent['EventDate']), 'h:i A');
                     echo '<div class="post-entry-1 border-bottom">
                 <div class="post-meta"><span class="date">' . $happeningSoonEvent['EventType'] . '</span> <span class="mx-1">&bullet;</span>
-                    <span>' . $happeningSoonEvent['EventDate'] . '</span>
+                    <span>' . $formattedDateTime . '</span>
                 </div>
                 <h2 class="mb-2"><a href="#">' . $happeningSoonEvent['EventTitle'] . '</a></h2>
                 <span class="author mb-3 d-block">' . $happeningSoonEvent['ContactName'] . '</span>
@@ -267,9 +269,11 @@
                 if ($latestEventResult) {
                   echo '<div class="tab-pane fade" id="pills-trending" role="tabpanel" aria-labelledby="pills-trending-tab">';
                   while ($latestEvent = mysqli_fetch_assoc($latestEventResult)) {
+
+                    $formattedDateTime = date_format(date_create($latestEvent['EventDate']), 'd-M-y') . ' &bull; ' . date_format(date_create($latestEvent['EventDate']), 'h:i A');
                     echo '<div class="post-entry-1 border-bottom">
                 <div class="post-meta"><span class="date">' . $latestEvent['EventType'] . '</span> <span class="mx-1">&bullet;</span>
-                    <span>' . $latestEvent['EventDate'] . '</span>
+                    <span>' . $formattedDateTime . '</span>
                 </div>
                 <h2 class="mb-2"><a href="#">' . $latestEvent['EventTitle'] . '</a></h2>
                 <span class="author mb-3 d-block">' . $latestEvent['ContactName'] . '</span>

@@ -117,6 +117,14 @@
                             required>
                         <input type="text" class="form-control mb-3" name="password" placeholder="Create a Password"
                             required>
+                        <div class="text-center">
+                            <?php
+                            if (isset ($_SESSION['username_exists']) && $_SESSION['username_exists'] === true) {
+                                echo '<h5 class="text-danger">Username already exists. Please choose a different username.</h5>';
+                                unset($_SESSION['username_exists']);
+                            }
+                            ?>
+                        </div>
                         <div class="text-center"><input class="btn btn-dark" type="submit" /></div>
                     </form>
                 </div>
@@ -126,7 +134,7 @@
                 $conn = new mysqli($db_hostname, $db_username, $db_password, $db_database);
 
                 if ($conn->connect_error) {
-                    die("Connection failed: " . $conn->connect_error);
+                    die ("Connection failed: " . $conn->connect_error);
                 }
 
                 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -140,6 +148,17 @@
                     $username = $_POST['username'];
                     $password = $_POST['password'];
 
+
+                    $stmt_checkexistinguser = $conn->prepare("SELECT * FROM login WHERE Username = ?");
+                    $stmt_checkexistinguser->bind_param("s", $username);
+                    $stmt_checkexistinguser->execute();
+                    $result = $stmt_checkexistinguser->get_result();
+
+                    if ($result->num_rows > 0) {
+                        $_SESSION['username_exists'] = true;
+                        header("Location: createAccount.php");
+                        exit();
+                    }
                     // The code to insert data into the 'Groups' table
                     $stmt = $conn->prepare("INSERT INTO Groups (GroupName, GroupType, ContactName, ContactEmail, GroupImage, GroupDesc) VALUES (?, ?, ?, ?, ?, ?)");
                     $stmt->bind_param("ssssss", $groupName, $groupType, $contactName, $contactEmail, $imageName, $groupDescription);
@@ -149,7 +168,25 @@
                     // The code to insert data into the 'login' table
                     $stmt_1 = $conn->prepare("INSERT INTO login (GroupID, Username, Password) VALUES (?, ?, ?)");
                     $stmt_1->bind_param("iss", $groupid, $username, $password);
-                    $stmt_1->execute();
+                    if ($stmt_1->execute()) {
+
+                        $sql = "SELECT * FROM login WHERE Username='$username'";
+                        $result = $conn->query($sql);
+
+                        if ($result->num_rows == 1) {
+
+                            $row = $result->fetch_assoc();
+                            session_start();
+                            $_SESSION['login'] = true;
+
+                            $_SESSION['AccountID'] = $row['AccountID'];
+                            $_SESSION['GroupID'] = $row['GroupID'];
+                            header("Location: post.php");
+                        }
+                        exit();
+                    } else {
+                        echo "Error: Unable to create account. Please try again.";
+                    }
 
                     // Close statements
                     $stmt->close();

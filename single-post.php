@@ -65,7 +65,7 @@
           <li><a href="about.php">About</a></li>
           <li><a href="post.php">Post Event</a></li>
           <ul>
-            <?php if (isset($_SESSION['login']) && $_SESSION['login'] === true): ?>
+            <?php if (isset ($_SESSION['login']) && $_SESSION['login'] === true): ?>
               <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">Login <span
                     class="caret"></span></a>
                 <ul class="dropdown-menu">
@@ -118,10 +118,10 @@
             $connection = new mysqli($db_hostname, $db_username, $db_password, $db_database);
 
             if ($connection->connect_error) {
-              die("Connection failed: " . $connection->connect_error);
+              die ("Connection failed: " . $connection->connect_error);
             }
 
-            if (isset($_REQUEST['EventID'])) {
+            if (isset ($_REQUEST['EventID'])) {
               $event_id = $_REQUEST['EventID'];
 
               // Query to fetch event details along with group and event type information
@@ -288,7 +288,7 @@
 
                 $connection = new mysqli($db_hostname, $db_username, $db_password, $db_database);
                 if ($connection->connect_error) {
-                  die("Connection failed: " . $connection->connect_error);
+                  die ("Connection failed: " . $connection->connect_error);
                 }
 
                 // upcoming
@@ -302,11 +302,13 @@
                 $happeningSoonResult = mysqli_query($connection, $happeningSoonQuery);
 
                 if ($happeningSoonResult) {
+
                   echo '<div class="tab-pane fade show active" id="pills-popular" role="tabpanel" aria-labelledby="pills-popular-tab">';
                   while ($happeningSoonEvent = mysqli_fetch_assoc($happeningSoonResult)) {
+                    $formattedDateTime = date_format(date_create($happeningSoonEvent['EventDate']), 'd-M-y') . ' &bull; ' . date_format(date_create($happeningSoonEvent['EventDate']), 'h:i A');
                     echo '<div class="post-entry-1 border-bottom">
                 <div class="post-meta"><span class="date">' . $happeningSoonEvent['EventType'] . '</span> <span class="mx-1">&bullet;</span>
-                    <span>' . $happeningSoonEvent['EventDate'] . '</span>
+                    <span>' . $formattedDateTime . '</span>
                 </div>
                 <h2 class="mb-2"><a href="#">' . $happeningSoonEvent['EventTitle'] . '</a></h2>
                 <span class="author mb-3 d-block">' . $happeningSoonEvent['ContactName'] . '</span>
@@ -331,9 +333,11 @@
                 if ($latestEventResult) {
                   echo '<div class="tab-pane fade" id="pills-trending" role="tabpanel" aria-labelledby="pills-trending-tab">';
                   while ($latestEvent = mysqli_fetch_assoc($latestEventResult)) {
+
+                    $formattedDateTime = date_format(date_create($latestEvent['EventDate']), 'd-M-y') . ' &bull; ' . date_format(date_create($latestEvent['EventDate']), 'h:i A');
                     echo '<div class="post-entry-1 border-bottom">
                 <div class="post-meta"><span class="date">' . $latestEvent['EventType'] . '</span> <span class="mx-1">&bullet;</span>
-                    <span>' . $latestEvent['EventDate'] . '</span>
+                    <span>' . $formattedDateTime . '</span>
                 </div>
                 <h2 class="mb-2"><a href="#">' . $latestEvent['EventTitle'] . '</a></h2>
                 <span class="author mb-3 d-block">' . $latestEvent['ContactName'] . '</span>
