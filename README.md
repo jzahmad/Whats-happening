@@ -1,1 +1,1 @@
-A personal blog publishing website
+An event blog publishing website
